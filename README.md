@@ -1,24 +1,27 @@
-# README
+# Taskey
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+The "key" to all of your task management dreams.
 
-Things you may want to cover:
+Installation
+===================
 
-* Ruby version
+Requires [ruby-3.2.2](https://github.com/rbenv/rbenv?tab=readme-ov-file#installation) and [postgresql](https://www.postgresql.org/download/).
 
-* System dependencies
+#### Create Postgres User/Password
+```sh
+# Create Postgres User/Password
+sudo -u postgres createuser -s <TASKEY_DATABASE_USER> -P
 
-* Configuration
+# Add to environment variables
+echo $'export TASKEY_DATABASE_USER="<TASKEY_DATABASE_USER>"\nexport TASKEY_DATABASE_PASSWORD="<TASKEY_DATABASE_PASSWORD>"\n' >> ~/.bashrc
 
-* Database creation
+# Use PSQL User
+source ~/.bashrc
+```
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+#### Install Gems and Setup Database
+```
+bundle install
+bin/rails db:create
+bin/rails db:migrate
+```
