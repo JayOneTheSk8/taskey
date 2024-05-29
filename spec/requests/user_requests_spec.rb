@@ -181,4 +181,125 @@ RSpec.describe "User Requests" do
       end
     end
   end
+
+  describe "Me" do
+    let!(:user) { create(:user) }
+    let(:me_query) do
+      <<~GRAPHQL
+        query Me {
+          me {
+            id
+            username
+            token
+            pendingTasks {
+              title
+              description
+              dueDate
+              completed
+            }
+            completedTasks {
+              title
+              description
+              dueDate
+              completed
+            }
+          }
+        }
+      GRAPHQL
+    end
+
+    context "when user is logged in" do
+      before do
+        post(
+          "/graphql",
+          params: {
+            query: login_mutation,
+            variables: {username: user.username, password: user.password}
+          }
+        )
+        user.reload
+      end
+
+      it "returns the user's data" do
+        post(
+          "/graphql",
+          params: {query: me_query},
+          headers: {"Authorization" => user.session_token}
+        )
+
+        expect(response.parsed_body["errors"]).to be_nil
+        expect(response.parsed_body["data"].deep_symbolize_keys).to eq(
+          {
+            me: {
+              id: user.id.to_s,
+              username: user.username,
+              token: nil,
+              pendingTasks: [],
+              completedTasks: []
+            }
+          }
+        )
+      end
+
+      context "when user has tasks" do
+        let!(:pending_task) { create(:task, author: user) }
+        let!(:past_due_task) { create(:task, :past_due, author: user) }
+        let!(:completed_task) { create(:task, :completed, author: user) }
+
+        it "returns the tasks grouped by 'pending' and 'complete'" do
+          post(
+            "/graphql",
+            params: {query: me_query},
+            headers: {"Authorization" => user.session_token}
+          )
+
+          expect(response.parsed_body["errors"]).to be_nil
+          expect(response.parsed_body["data"].deep_symbolize_keys).to eq(
+            {
+              me: {
+                id: user.id.to_s,
+                username: user.username,
+                token: nil,
+                pendingTasks: [
+                  {
+                    title: past_due_task.title,
+                    description: past_due_task.description,
+                    dueDate: past_due_task.due_date.strftime("%Y-%m-%d"),
+                    completed: false
+                  },
+                  {
+                    title: pending_task.title,
+                    description: pending_task.description,
+                    dueDate: nil,
+                    completed: false
+                  }
+                ],
+                completedTasks: [
+                  {
+                    title: completed_task.title,
+                    description: completed_task.description,
+                    dueDate: nil,
+                    completed: true
+                  }
+                ]
+              }
+            }
+          )
+        end
+      end
+    end
+
+    context "when user is not logged in" do
+      it "returns an error" do
+        post(
+          "/graphql",
+          params: {query: me_query},
+          headers: {"Authorization" => user.session_token}
+        )
+
+        expect(response.parsed_body["data"]).to be_nil
+        expect(response.parsed_body.dig("errors", 0, "message")).to eq("Must be signed in!")
+      end
+    end
+  end
 end
