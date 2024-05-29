@@ -7,6 +7,10 @@ AllCops:
   TargetRubyVersion: 3.2.2
   NewCops: enable
   SuggestExtensions: false
+  Exclude:
+    - 'app/graphql/taskey_schema.rb'
+    - 'bin/*'
+    - 'db/schema.rb'
 
 FactoryBot/FactoryAssociationWithStrategy:
   Enabled: false
