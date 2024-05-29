@@ -27,7 +27,7 @@ class GraphqlController < ApplicationController
   def lookup_current_user_from_token
     header = request.headers["AUTHORIZATION"]
     token = header&.gsub(/\AToken\s/, "")
-    User.find_by(session_token: token)
+    User.find_by(session_token: token) if session[:session_token] == token
   end
 
   # Handle variables in form data, JSON body, or a blank value
