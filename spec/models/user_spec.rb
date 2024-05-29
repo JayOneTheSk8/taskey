@@ -94,5 +94,11 @@ RSpec.describe User do
         expect(described_class.find_by_credentials(u.username, "password")).to be_nil
       end
     end
+
+    context "when username does not exist" do
+      it "returns nil" do
+        expect(described_class.find_by_credentials("some-one", "password")).to be_nil
+      end
+    end
   end
 end

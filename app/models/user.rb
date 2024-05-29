@@ -33,10 +33,6 @@ class User < ApplicationRecord
   )
 
   def self.find_by_credentials(username, password)
-    User
-      .where(username:)
-      .first
-      .authenticate(password)
-      .presence
+    User.where(username:).first&.authenticate(password).presence
   end
 end
