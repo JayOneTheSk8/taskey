@@ -6,7 +6,7 @@ module Types
     field :username, String, null: false
     field :pending_tasks, [TaskType], null: false
     field :completed_tasks, [TaskType], null: false
-    field :token, String, description: "The current authorization token for the user; exists only in memory."
+    field :token, String, description: "The session_token for the user; only present on login."
     field :created_at, GraphQL::Types::ISO8601DateTime, null: false
     field :updated_at, GraphQL::Types::ISO8601DateTime, null: false
   end
