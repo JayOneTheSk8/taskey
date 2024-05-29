@@ -22,8 +22,10 @@ class User < ApplicationRecord
     dependent: :destroy
   )
 
-  validates :password, length: { minimum: 6 }, if: :password_digest_changed?
+  after_initialize :ensure_session_token!
 
+  validates :session_token, presence: true, uniqueness: true
+  validates :password, length: { minimum: 6 }, if: :password_digest_changed?
   validates(
     :username,
     format: {with: /\A[\w\-\.]+\z/}, # can only include letters and "-" or "."
@@ -34,5 +36,17 @@ class User < ApplicationRecord
 
   def self.find_by_credentials(username, password)
     User.where(username:).first&.authenticate(password).presence
+  end
+
+  def reset_session_token!
+    self.session_token = SecureRandom.urlsafe_base64(32)
+    save!
+    session_token
+  end
+
+  private
+
+  def ensure_session_token!
+    self.session_token ||= SecureRandom.urlsafe_base64(32)
   end
 end
