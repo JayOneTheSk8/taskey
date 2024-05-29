@@ -46,5 +46,34 @@ module Types
       current_user.reset_session_token!
       current_user.id
     end
+
+    field(
+      :update_username,
+      Types::UserType,
+      null: false,
+      description: "Updates a user's username"
+    ) do
+      argument :username, String, required: true
+    end
+    def update_username(username:)
+      verify_authentication!
+      raise GraphQL::ExecutionError, current_user.errors.full_messages.join(", ") unless current_user.update(username:)
+
+      current_user
+    end
+
+    field(
+      :delete_user,
+      ID,
+      null: false,
+      description: "Deletes the logged in user and logs them out"
+    )
+    def delete_user
+      verify_authentication!
+      raise GraphQL::ExecutionError, current_user.errors.full_messages.join(", ") unless current_user.destroy
+
+      reset_session!
+      current_user.id
+    end
   end
 end
