@@ -37,8 +37,8 @@ module Types
     field(
       :logout,
       ID,
-      null: true,
-      description: "Logs the user out by resetting their Global ID"
+      null: false,
+      description: "Logs the user out by resetting their session token"
     )
     def logout
       verify_authentication!
