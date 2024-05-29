@@ -2,6 +2,23 @@ class User < ApplicationRecord
   # Use password digest
   has_secure_password
 
+  # Pending tasks should be ordered by due date to prioritise past due tasks
+  has_many(
+    :pending_tasks,
+    -> { where(completed: false).order(due_date: :asc, id: :desc) },
+    class_name: :Task,
+    foreign_key: :author_id,
+    dependent: :destroy
+  )
+  # Completed tasks should be ordered by id as due date isn't priority
+  has_many(
+    :completed_tasks,
+    -> { where(completed: true).order(id: :desc) },
+    class_name: :Task,
+    foreign_key: :author_id,
+    dependent: :destroy
+  )
+
   validates :password, length: { minimum: 6 }, if: :password_digest_changed?
 
   validates(
