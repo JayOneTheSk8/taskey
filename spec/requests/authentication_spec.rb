@@ -172,18 +172,18 @@ RSpec.describe "Authentication" do
       end
 
       it "returns the logged in user's id" do
-        post("/graphql", params: {query: logout_mutation}, headers: {"Authorization" => user.session_token })
+        post("/graphql", params: {query: logout_mutation}, headers: {"Authorization" => user.session_token})
         expect(response.parsed_body["errors"]).to be_nil
         expect(response.parsed_body["data"]["logout"]).to eq(user.id.to_s)
       end
 
       it "resets the user's session token" do
-        expect { post("/graphql", params: {query: logout_mutation}, headers: {"Authorization" => user.session_token }) }
+        expect { post("/graphql", params: {query: logout_mutation}, headers: {"Authorization" => user.session_token}) }
           .to change { user.reload.session_token }
       end
 
       it "nullifies the session's token" do
-        expect { post("/graphql", params: {query: logout_mutation}, headers: {"Authorization" => user.session_token }) }
+        expect { post("/graphql", params: {query: logout_mutation}, headers: {"Authorization" => user.session_token}) }
           .to change { session[:session_token] }.to(nil)
       end
     end
