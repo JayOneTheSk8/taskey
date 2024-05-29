@@ -1,19 +1,37 @@
 require "rails_helper"
 
 RSpec.describe "Authentication" do
+  let(:login_mutation) do
+    <<~GRAPHQL
+      mutation Login($username: String!, $password: String!) {
+        login(username: $username, password: $password) {
+          id
+          username
+          token
+        }
+      }
+    GRAPHQL
+  end
+  let(:register_mutation) do
+    <<~GRAPHQL
+      mutation Register($username: String!, $password: String!) {
+        register(username: $username, password: $password) {
+          username
+          token
+        }
+      }
+    GRAPHQL
+  end
+  let(:logout_mutation) do
+    <<~GRAPHQL
+      mutation Logout {
+        logout
+      }
+    GRAPHQL
+  end
+
   describe "Login" do
     let!(:user) { create(:user) }
-    let(:login_mutation) do
-      <<~GRAPHQL
-        mutation Login($username: String!, $password: String!) {
-          login(username: $username, password: $password) {
-            id
-            username
-            token
-          }
-        }
-      GRAPHQL
-    end
     let(:params) do
       {
         query: login_mutation,
@@ -72,16 +90,6 @@ RSpec.describe "Authentication" do
     let(:username) { "HowardPerson" }
     let(:password) { "h0w@rdP3r$0n" }
 
-    let(:register_mutation) do
-      <<~GRAPHQL
-        mutation Register($username: String!, $password: String!) {
-          register(username: $username, password: $password) {
-            username
-            token
-          }
-        }
-      GRAPHQL
-    end
     let(:params) do
       {
         query: register_mutation,
@@ -141,6 +149,50 @@ RSpec.describe "Authentication" do
         expect(response.parsed_body["data"]).to be_nil
         expect(response.parsed_body.dig("errors", 0, "message"))
           .to eq("Password is too short (minimum is 6 characters)")
+      end
+    end
+  end
+
+  describe "Logout" do
+    context "when user is logged in" do
+      let!(:user) { create(:user) }
+
+      before do
+        post(
+          "/graphql",
+          params: {
+            query: login_mutation,
+            variables: {
+              username: user.username,
+              password: user.password
+            }
+          }
+        )
+        user.reload
+      end
+
+      it "returns the logged in user's id" do
+        post("/graphql", params: {query: logout_mutation}, headers: {"Authorization" => user.session_token })
+        expect(response.parsed_body["errors"]).to be_nil
+        expect(response.parsed_body["data"]["logout"]).to eq(user.id.to_s)
+      end
+
+      it "resets the user's session token" do
+        expect { post("/graphql", params: {query: logout_mutation}, headers: {"Authorization" => user.session_token }) }
+          .to change { user.reload.session_token }
+      end
+
+      it "nullifies the session's token" do
+        expect { post("/graphql", params: {query: logout_mutation}, headers: {"Authorization" => user.session_token }) }
+          .to change { session[:session_token] }.to(nil)
+      end
+    end
+
+    context "when no user is logged in" do
+      it "returns an error" do
+        post("/graphql", params: {query: logout_mutation})
+        expect(response.parsed_body.dig("data", "logout")).to be_nil
+        expect(response.parsed_body.dig("errors", 0, "message")).to eq("Must be signed in!")
       end
     end
   end

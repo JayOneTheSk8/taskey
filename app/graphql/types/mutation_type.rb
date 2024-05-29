@@ -33,5 +33,18 @@ module Types
 
       login!(user)
     end
+
+    field(
+      :logout,
+      ID,
+      null: true,
+      description: "Logs the user out by resetting their Global ID"
+    )
+    def logout
+      verify_authentication!
+      reset_session!
+      current_user.reset_session_token!
+      current_user.id
+    end
   end
 end
