@@ -77,6 +77,13 @@ RSpec.describe User do
     end
   end
 
+  describe "after_initialize" do
+    it "gives the user a session_token" do
+      u = described_class.new
+      expect(u.session_token).to be_present
+    end
+  end
+
   describe ".find_by_credentials" do
     let(:password) { "G00d+im3s" }
     let!(:u) { create(:user, password:) }
@@ -99,6 +106,21 @@ RSpec.describe User do
       it "returns nil" do
         expect(described_class.find_by_credentials("some-one", "password")).to be_nil
       end
+    end
+  end
+
+  describe "#reset_session_token!" do
+    let!(:u) { create(:user) }
+
+    it "changes the user's session token" do
+      expect { u.reset_session_token! }
+        .to change { u.reload.session_token }
+        .and change { u.reload.updated_at }
+    end
+
+    it "returns the new session_token" do
+      old_session_token = u.session_token
+      expect(u.reset_session_token!).not_to eq(old_session_token)
     end
   end
 end
