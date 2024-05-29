@@ -11,7 +11,8 @@ class GraphqlController < ApplicationController
     query = params[:query]
     operation_name = params[:operationName]
     context = {
-      current_user: lookup_current_user_from_token
+      current_user: lookup_current_user_from_token,
+      session:
     }
     result = TaskeySchema.execute(query, variables:, context:, operation_name:)
     render json: result
@@ -26,7 +27,7 @@ class GraphqlController < ApplicationController
   def lookup_current_user_from_token
     header = request.headers["AUTHORIZATION"]
     token = header&.gsub(/\AToken\s/, "")
-    GlobalID::Locator.locate_signed(token, for: :graphql)
+    User.find_by(session_token: token)
   end
 
   # Handle variables in form data, JSON body, or a blank value
