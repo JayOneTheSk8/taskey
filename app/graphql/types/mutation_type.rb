@@ -6,7 +6,7 @@ module Types
       :login,
       Types::UserType,
       null: false,
-      description: "Logs a User in with a Signed Global ID"
+      description: "Logs a User in via session token."
     ) do
       argument :username, String, required: true
       argument :password, String, required: true
@@ -15,15 +15,14 @@ module Types
       user = User.find_by_credentials(username, password)
       raise GraphQL::ExecutionError, "Invalid username or password" unless user
 
-      user.token = user.to_sgid(expires_in: 12.hours, for: :graphql)
-      user
+      login!(user)
     end
 
     field(
       :register,
       Types::UserType,
       null: false,
-      description: "Creates a User then logs them in with a Signed Global ID"
+      description: "Creates a User then logs them in via session token"
     ) do
       argument :username, String, required: true
       argument :password, String, required: true
@@ -32,8 +31,7 @@ module Types
       user = User.new(username:, password:)
       raise GraphQL::ExecutionError, user.errors.full_messages.join(", ") unless user.save
 
-      user.token = user.to_sgid(expires_in: 12.hours, for: :graphql)
-      user
+      login!(user)
     end
   end
 end

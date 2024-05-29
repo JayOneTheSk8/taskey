@@ -1,12 +1,6 @@
 require "rails_helper"
 
 RSpec.describe "Authentication" do
-  let(:token) { "123" }
-
-  before do
-    allow_any_instance_of(User).to receive(:to_sgid).and_return(token)
-  end
-
   describe "Login" do
     let!(:user) { create(:user) }
     let(:login_mutation) do
@@ -30,8 +24,9 @@ RSpec.describe "Authentication" do
       }
     end
 
-    it "returns the user data with their signed Global ID as a token" do
+    it "returns the user data with their session_token as a token" do
       post("/graphql", params:)
+      user.reload
 
       expect(response.parsed_body["errors"]).to be_nil
       expect(response.parsed_body["data"].deep_symbolize_keys).to eq(
@@ -39,10 +34,17 @@ RSpec.describe "Authentication" do
           login: {
             id: user.id.to_s,
             username: user.username,
-            token:
+            token: user.session_token
           }
         }
       )
+    end
+
+    it "logs the user in" do
+      post("/graphql", params:)
+      user.reload
+
+      expect(session[:session_token]).to eq(user.session_token)
     end
 
     context "when password is incorrect" do
@@ -90,18 +92,26 @@ RSpec.describe "Authentication" do
       }
     end
 
-    it "returns the user with their signed Global ID as a token" do
+    it "returns the user with their session_token as a token" do
       post("/graphql", params:)
+      user = User.last
 
       expect(response.parsed_body["errors"]).to be_nil
       expect(response.parsed_body["data"].deep_symbolize_keys).to eq(
         {
           register: {
             username:,
-            token:
+            token: user.session_token
           }
         }
       )
+    end
+
+    it "logs the user in" do
+      post("/graphql", params:)
+      user = User.last
+
+      expect(session[:session_token]).to eq(user.session_token)
     end
 
     context "when the username is taken" do
