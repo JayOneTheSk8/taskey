@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+  # For use with login and register mutations
+  attr_accessor :token
+
   # Use password digest
   has_secure_password
 
