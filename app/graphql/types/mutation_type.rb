@@ -75,5 +75,115 @@ module Types
       reset_session!
       current_user.id
     end
+
+    field(
+      :create_task,
+      Types::TaskType,
+      null: false,
+      description: "Creates a task for the current user"
+    ) do
+      argument :title, String, required: true
+      argument :description, String, required: true
+      argument :due_date, GraphQL::Types::ISO8601Date, required: false
+    end
+    def create_task(title:, description:, due_date: nil)
+      verify_authentication!
+      task = Task.new(title:, description:, due_date:, author: current_user)
+      raise GraphQL::ExecutionError, task.errors.full_messages.join(", ") unless task.save
+
+      task
+    end
+
+    field(
+      :update_task,
+      Types::TaskType,
+      null: false,
+      description: "Updates a task if it belongs to the current user"
+    ) do
+      argument :id, ID, required: true
+      argument :title, String, required: true
+      argument :description, String, required: true
+      argument :due_date, GraphQL::Types::ISO8601Date, required: false
+    end
+    def update_task(id:, title:, description:, due_date: nil)
+      verify_authentication!
+      task = Task.find_by(id:)
+
+      validate_task!(task, "update")
+
+      # Update task
+      unless task.update(title:, description:, due_date:)
+        raise GraphQL::ExecutionError, task.errors.full_messages.join(", ")
+      end
+
+      task
+    end
+
+    field(
+      :delete_task,
+      ID,
+      null: false,
+      description: "Deletes a task if it belongs to the current user"
+    ) do
+      argument :id, ID, required: true
+    end
+    def delete_task(id:)
+      verify_authentication!
+      task = Task.find_by(id:)
+
+      validate_task!(task, "delete")
+
+      # Delete task
+      raise GraphQL::ExecutionError, task.errors.full_messages.join(", ") unless task.destroy
+
+      task.id
+    end
+
+    field(
+      :complete_task,
+      Types::TaskType,
+      null: false,
+      description: "Completes a task if it belongs to the current user"
+    ) do
+      argument :id, ID, required: true
+    end
+    def complete_task(id:)
+      verify_authentication!
+      task = Task.find_by(id:)
+
+      validate_task!(task, "manage")
+      task.complete!
+      task
+    rescue StandardError => e
+      raise GraphQL::ExecutionError, e.message
+    end
+
+    field(
+      :mark_task_incomplete,
+      Types::TaskType,
+      null: false,
+      description: "Marks a task incomplete if it belongs to the current user"
+    ) do
+      argument :id, ID, required: true
+    end
+    def mark_task_incomplete(id:)
+      verify_authentication!
+      task = Task.find_by(id:)
+
+      validate_task!(task, "manage")
+      task.mark_incomplete!
+      task
+    rescue StandardError => e
+      raise GraphQL::ExecutionError, e.message
+    end
+
+    private
+
+    def validate_task!(task, operation)
+      # Validate task exists
+      raise GraphQL::ExecutionError, "Could not find Task" if task.blank?
+      # Validate task belongs to user
+      raise GraphQL::ExecutionError, "Cannot #{operation} others' Tasks" unless task.author_id == current_user.id
+    end
   end
 end
