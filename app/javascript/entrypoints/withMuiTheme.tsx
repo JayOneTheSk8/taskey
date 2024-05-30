@@ -1,6 +1,5 @@
 import React from 'react'
-import { createTheme, ThemeProvider } from '@material-ui/core/styles'
-import CssBaseline from '@material-ui/core/CssBaseline'
+import { createTheme, ThemeProvider, CssBaseline } from '@material-ui/core'
 
 const theme = createTheme({
   typography: {
