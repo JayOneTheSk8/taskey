@@ -11,11 +11,15 @@ import TaskPage from './components/TaskPage'
 
 const {
   endpoints,
+  components: {
+    navbar: {
+      SETTINGS,
+      TASKEY,
+    },
+  },
 } = constants
 
-const Root = (props: any) => {
-  const { classes } = props
-
+const Root = ({ classes }: { [key: string]: any }) => {
   // TODO: This is for testing; to remove
   const isLoggedIn = true
 
@@ -23,8 +27,10 @@ const Root = (props: any) => {
     <div className={classes.root}>
       {
         isLoggedIn &&
-          <div>
-            <div>Settings</div>
+          <div className={classes.navbar}>
+            <div></div>
+            <div className={classes.taskeyIcon}>{TASKEY}</div>
+            <div className={classes.settings}>{SETTINGS}</div>
           </div>
       }
 
@@ -44,6 +50,32 @@ const Root = (props: any) => {
 }
 
 const styles = () => ({
+  navbar: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: '1em',
+    alignItems: 'center',
+    borderBottom: '1px solid black',
+    boxShadow: '0px 1px 7px 2px',
+  },
+  taskeyIcon: {
+    padding: '1em',
+    border: '2px solid black',
+    height: '5em',
+    width: '5em',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    cursor: 'pointer',
+    fontSize: '20px',
+    fontWeight: 600,
+    textDecoration: 'underline',
+  },
+  settings: {
+    cursor: 'pointer',
+    fontSize: '20px',
+    fontWeight: 600,
+  },
   root: {
 
   }
