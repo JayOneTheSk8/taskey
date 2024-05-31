@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { withStyles } from '@material-ui/core'
+import { useMutation } from '@apollo/client'
 
 import constants from '../../constants'
+import { COMPLETE_TASK, MARK_TASK_INCOMPLETE } from '../../queries/tasks'
+import { dispatchEvent } from '../../util'
 
 export interface TaskItemType {
   id: string
@@ -17,7 +20,15 @@ interface TaskItemProps extends TaskItemType {
 }
 
 const {
+  errors: {
+    errorTypes: {
+      GENERAL_ERROR,
+    },
+  },
   general: {
+    eventTypes: {
+      COMPLETETASK,
+    },
     fieldTexts: {
       EDIT,
     },
@@ -35,6 +46,46 @@ const TaskItem = ({
 }: TaskItemProps) => {
   // TODO: Add edit capabilities
 
+  const [errors, setErrors] = useState({} as { [key: string]: string })
+
+  const [completeTask, { loading: completingTask }] = useMutation(COMPLETE_TASK, {
+    onError(err) {
+      setErrors({
+        ...errors,
+        [GENERAL_ERROR]: err.graphQLErrors.map((e) => e.message).join(', ')
+      })
+    }
+  })
+
+  const [markTaskIncomplete, { loading: markingTaskIncomplete }] = useMutation(MARK_TASK_INCOMPLETE, {
+    onError(err) {
+      setErrors({
+        ...errors,
+        [GENERAL_ERROR]: err.graphQLErrors.map((e) => e.message).join(', ')
+      })
+    }
+  })
+
+  const handleTask = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (completingTask || markingTaskIncomplete) return
+
+    if (completed) {
+      markTaskIncomplete({ variables: { id }})
+        .then(({ data }) => {
+          if (data) {
+            dispatchEvent(COMPLETETASK, { completed: false, taskIdx: index })
+          }
+        })
+    } else {
+      completeTask({ variables: { id } })
+        .then(({ data }) => {
+          if (data) {
+            dispatchEvent(COMPLETETASK, { completed: true, taskIdx: index })
+          }
+        })
+    }
+  }
+
   // Color due date red and notate if past due
   const pastDue = (dueDate: string): boolean => {
     if (completed) return false
@@ -43,8 +94,13 @@ const TaskItem = ({
 
   return (
     <div className={classes.taskItem}>
+      {
+        errors[GENERAL_ERROR] &&
+          <div className={classes.errorMessage}>{errors[GENERAL_ERROR]}</div>
+      }
+
       <div className={classes.taskManageArea}>
-        <input type="checkbox" defaultChecked={completed} className={classes.completed} />
+        <input type="checkbox" checked={completed} className={classes.completed} onChange={handleTask} />
         <div className={classes.edit}>{EDIT}</div>
       </div>
 
@@ -94,6 +150,9 @@ const styles = () => ({
   },
   description: {
     margin: '5px 0',
+  },
+  errorMessage: {
+    color: '#cf0404',
   },
 })
 
