@@ -136,7 +136,7 @@ const styles = () => ({
     marginBottom: '1em',
   },
   errorMessage: {
-
+    color: '#cf0404',
   },
   authForm: {
     display: 'flex',
