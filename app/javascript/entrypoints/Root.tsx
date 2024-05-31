@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { withStyles } from '@material-ui/core'
 
@@ -26,7 +26,7 @@ const {
 
 const Root = ({ classes }: { [key: string]: any }) => {
   // User is logged in if there is a session token in local storage
-  const isLoggedIn = !!localStorage.getItem(SESSION_TOKEN)
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem(SESSION_TOKEN))
 
   return (
     <div className={classes.root}>
