@@ -8,13 +8,13 @@ Authentication is handled via Rails' [Session Store](https://guides.rubyonrails.
 
 Table of Contents
 ===================
-- [Running Full Application](##running-full-application-dev)
+- [Running Full Application](#running-full-application-dev)
 
 - [Installation](#installation)
   - [Backend](#backend)
   - [Frontend](#frontend)
 
-- [Notes/Thoughts](##notesthoughts)
+- [Notes/Thoughts](#notesthoughts)
 
 Running Full Application (Dev)
 ===================
