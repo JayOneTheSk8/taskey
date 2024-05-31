@@ -20,7 +20,7 @@ interface ReducerAction {
   payload?: UserData
 }
 
-interface UserData {
+export interface UserData {
   id: string
   username: string
   token?: string
