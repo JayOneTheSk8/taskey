@@ -17,11 +17,16 @@ const {
       TASKEY,
     },
   },
+  util: {
+    tokens: {
+      SESSION_TOKEN,
+    },
+  },
 } = constants
 
 const Root = ({ classes }: { [key: string]: any }) => {
-  // TODO: This is for testing; to remove
-  const isLoggedIn = true
+  // User is logged in if there is a session token in local storage
+  const isLoggedIn = !!localStorage.getItem(SESSION_TOKEN)
 
   return (
     <div className={classes.root}>
