@@ -51,39 +51,55 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
     const handler = (event: any) => {
       const {
         detail: {
-          complete,
+          completed,
           taskIdx,
         }
       } = event
 
-      if (complete) {
-        // If task is complete, we want to move it from pending to complete
+      if (completed) {
+        // If task is completed, we want to move it from pending to complete
         
         // Copy pending tasks to avoid change before state change
         const tempPending = [...pendingTasks]
         // Remove relevant task
-        const task = tempPending.splice(taskIdx, 1)[0]
-        // Update checkbox for task
-        task.completed = true
+        const selectedTask = tempPending.splice(taskIdx, 1)[0]
+
+        // Selected Task is read only so we'll create a new one
+        const task: TaskItemType = {
+          id: selectedTask.id,
+          title: selectedTask.title,
+          description: selectedTask.description,
+          completed: true,
+          dueDate: selectedTask.dueDate,
+        }
 
         // Update pending and add task to the top of completed
         setPendingTasks(tempPending)
         setCompletedTasks([task, ...completedTasks])
       } else {
-        // If task is incomplete, we want to move it from complete to pending
+        // If task is marked incomplete, we want to move it from complete to pending
         const tempCompleted = [...completedTasks]
-        const task = tempCompleted.splice(taskIdx, 1)[0]
-        task.completed = false
+        const selectedTask = tempCompleted.splice(taskIdx, 1)[0]
 
+        // Create new task
+        const task: TaskItemType = {
+          id: selectedTask.id,
+          title: selectedTask.title,
+          description: selectedTask.description,
+          completed: false,
+          dueDate: selectedTask.dueDate,
+        }
+
+        // Update state
         setCompletedTasks(tempCompleted)
-        setCompletedTasks([task, ...pendingTasks])
+        setPendingTasks([task, ...pendingTasks])
       }
     }
 
     window.addEventListener(COMPLETETASK, handler)
 
     return () => window.removeEventListener(COMPLETETASK, handler)
-  }, [])
+  }, [pendingTasks, completedTasks])
 
   const taskList = (tasks: TaskItemType[]) => {
     return tasks.map((task, idx) => {
