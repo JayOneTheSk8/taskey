@@ -99,3 +99,40 @@ via Foreman
 ```sh
 bin/dev
 ```
+
+Notes/Thoughts
+===================
+
+### Task Display Order
+I think deciding on the order of tasks was interesting to consider. I wanted to
+fetch them all in one query but quickly realised that the order of each list
+(pending/completed) would be different. The completed task list should be ordered
+by the latest task created while the pending task list should be ordered by the
+`due_date` to prioritise past due tasks. It will at most be two calls though so I
+felt the trade off worth it.
+
+In a different world, we could have a priority column to keep the tasks in the order
+the user wanted. We could also replace the `completed` column with a `completed_at`
+datetime columna and sort by that for the completed list.
+
+### Length Limits
+Should I think about string limits? I'm not sure, but this should be addressed by
+clarifying future scaling product requirements.
+
+### Linting
+Rubocop is a gift in cleanliness and a curse in speediness. I wanted to add typescript linting via eslint, but it quickly became too complicated and slowed the process down. 
+
+### Auth Refactoring
+Initially, I used Rails' [Global ID](https://github.com/rails/globalid) for server authentication, but the issue is that the "session" (in that sense) cannot be cleared. It was simple enough to refactor.
+
+### Default to Session Token Column
+The `session_token` was a newly migrated field and was not null, so to be proper, I felt it deserved a default value in the migration. Since there aren't many rows and in real life we would have decided on a plan **before** implementation, I just made it a random string. With the small number of rows, it was unique enough.
+
+### Adding Javascript
+Adding Javascript just kind of works in Rails so it feels very black box. Also, since it requires bundling, tracing errors through functions was difficult.
+
+### GraphQL Schema Descriptions
+I wanted to add more descriptions in the GraphQL schema but having descriptions like "The user's username" are not helpful and only waste 3 lines of code.
+
+### Rendering Tasks in Frontend
+I think there are faster ways of editing the tasks lists in the frontend but I went for funtional first and planned on iterating later. If we really cared, we could use a better data structure to avoid O(n) time complexity.
