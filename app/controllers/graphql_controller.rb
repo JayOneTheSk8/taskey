@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 class GraphqlController < ApplicationController
+  # This and uncommenting the below work, but doing it this way
+  # allows the session_token to be persisited
+  skip_forgery_protection
+
   # If accessing from outside this domain, nullify the session
   # This allows for outside API access while preventing CSRF attacks,
   # but you'll have to authenticate your user separately
