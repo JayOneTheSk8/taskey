@@ -30,7 +30,7 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
   const [pendingTasks, setPendingTasks] = useState([] as TaskItemType[])
   const [completedTasks, setCompletedTasks] = useState([] as TaskItemType[])
 
-  const { data, loading, error } = useQuery(ME_QUERY, {
+  const { data, loading, error: meQueryError } = useQuery(ME_QUERY, {
     onCompleted(data) {
       const { id, username } = data.me
       context.login({ id, username })
@@ -117,7 +117,7 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
     })
   }
 
-  if (error) return <div>ERROR</div>
+  if (meQueryError) return <div>{meQueryError.message}</div>
   if (loading) return <div>LOADING...</div>
 
   return (
