@@ -25,3 +25,26 @@ export const LOGOUT_USER = gql`
     logout
   }
 `
+
+export const ME_QUERY = gql`
+  query Me {
+    me {
+      id
+      username
+      pendingTasks {
+        id
+        title
+        description
+        dueDate
+        completed
+      }
+      completedTasks {
+        id
+        title
+        description
+        dueDate
+        completed
+      }
+    }
+  }
+`
