@@ -1,0 +1,100 @@
+"""
+An ISO 8601-encoded date
+"""
+scalar ISO8601Date @specifiedBy(url: "https://tools.ietf.org/html/rfc3339")
+
+"""
+An ISO 8601-encoded datetime
+"""
+scalar ISO8601DateTime @specifiedBy(url: "https://tools.ietf.org/html/rfc3339")
+
+type Mutation {
+  """
+  Completes a task if it belongs to the current user
+  """
+  completeTask(id: ID!): Task!
+
+  """
+  Creates a task for the current user
+  """
+  createTask(description: String!, dueDate: ISO8601Date, title: String!): Task!
+
+  """
+  Deletes a task if it belongs to the current user
+  """
+  deleteTask(id: ID!): ID!
+
+  """
+  Deletes the logged in user and logs them out
+  """
+  deleteUser: ID!
+
+  """
+  Logs a User in via session token.
+  """
+  login(password: String!, username: String!): User!
+
+  """
+  Logs the user out by resetting their session token
+  """
+  logout: ID!
+
+  """
+  Marks a task incomplete if it belongs to the current user
+  """
+  markTaskIncomplete(id: ID!): Task!
+
+  """
+  Creates a User then logs them in via session token
+  """
+  register(password: String!, username: String!): User!
+
+  """
+  Updates a task if it belongs to the current user
+  """
+  updateTask(description: String!, dueDate: ISO8601Date, id: ID!, title: String!): Task!
+
+  """
+  Updates a user's username
+  """
+  updateUsername(username: String!): User!
+}
+
+type Query {
+  """
+  Data on the current logged in user
+  """
+  me: User!
+}
+
+type Task {
+  author: User!
+  completed: Boolean!
+  createdAt: ISO8601DateTime!
+  description: String!
+  dueDate: ISO8601Date
+  id: ID!
+  title: String!
+  updatedAt: ISO8601DateTime!
+}
+
+type User {
+  """
+  List of completed tasks sorted by ID (and by proxy creation date)
+  """
+  completedTasks: [Task!]!
+  createdAt: ISO8601DateTime!
+  id: ID!
+
+  """
+  List of pending tasks sorted by ascending due date
+  """
+  pendingTasks: [Task!]!
+
+  """
+  The session_token for the user; only present on login.
+  """
+  token: String
+  updatedAt: ISO8601DateTime!
+  username: String!
+}
