@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { withStyles } from '@material-ui/core'
+import { useMutation } from '@apollo/client'
 
 import constants from './constants'
 import withMuiTheme from './withMuiTheme'
 import { AuthRoutes, ProtectedRoutes } from './routes'
+import { AuthContext } from './authContext'
+import { dispatchEvent } from './util'
+import { LOGOUT_USER } from './queries/auth'
 
 import AuthPage from './components/AuthPage'
 import TaskPage from './components/TaskPage'
@@ -13,7 +17,7 @@ const {
   endpoints,
   components: {
     navbar: {
-      SETTINGS,
+      LOGOUT,
       TASKEY,
     },
   },
@@ -30,8 +34,23 @@ const {
 } = constants
 
 const Root = ({ classes }: { [key: string]: any }) => {
+  const context = useContext(AuthContext)
+
   // User is logged in if there is a session token in local storage
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem(SESSION_TOKEN))
+
+  const [logoutUser, { loading: loggingOut }] = useMutation(LOGOUT_USER, {
+    onError(err) {
+      // Regardless, if this mutation returns with or without error
+      // We should log out the frontend
+      context.logout()
+      dispatchEvent(LOGINUSER, { loggedIn: false })
+
+      err.graphQLErrors.forEach((e) => {
+        console.log(e);
+      });
+    }
+  })
 
   // This allows us to update this state from child components
   useEffect(() => {
@@ -44,14 +63,28 @@ const Root = ({ classes }: { [key: string]: any }) => {
     return () => window.removeEventListener(LOGINUSER, handler)
   }, [])
 
+  if (loggingOut) return <div>Loading...</div>
+
   return (
     <div className={classes.root}>
       {
         isLoggedIn &&
           <div className={classes.navbar}>
             <div></div>
+
             <div className={classes.taskeyIcon}>{TASKEY}</div>
-            <div className={classes.settings}>{SETTINGS}</div>
+
+            <div
+              className={classes.settings}
+              onClick={() => {
+                logoutUser().then(() => {
+                  context.logout()
+                  dispatchEvent(LOGINUSER, { loggedIn: false })
+                })
+              }}
+            >
+              {LOGOUT}
+            </div>
           </div>
       }
 

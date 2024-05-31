@@ -8,6 +8,7 @@ const {
 } = util
 
 const navbar = {
+  LOGOUT: 'Logout',
   SETTINGS: 'Settings',
   TASKEY: 'Taskey',
 }
