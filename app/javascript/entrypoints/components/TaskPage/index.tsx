@@ -9,6 +9,17 @@ import { CREATE_TASK } from '../../queries/tasks'
 
 import TaskItem, { TaskItemType } from './TaskItem'
 
+export interface QuickChangeTaskDetail {
+  index: number
+  completed: boolean
+}
+
+export interface UpdateTaskDetail extends QuickChangeTaskDetail {
+  title: string
+  description: string
+  dueDate: string
+}
+
 const {
   components: {
     taskPage: {
@@ -81,15 +92,10 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
   }, [data])
 
 
-  // Add event listener for when task is marked complete or incomplete
+  // Event listener for when task is marked complete or incomplete
   useEffect(() => {
     const handler = (event: any) => {
-      const {
-        detail: {
-          completed,
-          taskIdx,
-        }
-      } = event
+      const { completed, index } = event.detail as QuickChangeTaskDetail
 
       if (completed) {
         // If task is completed, we want to move it from pending to complete
@@ -97,7 +103,7 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
         // Copy pending tasks to avoid change before state change
         const tempPending = [...pendingTasks]
         // Remove relevant task
-        const selectedTask = tempPending.splice(taskIdx, 1)[0]
+        const selectedTask = tempPending.splice(index, 1)[0]
 
         // Selected Task is read only so we'll create a new one
         const task: TaskItemType = {
@@ -114,7 +120,7 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
       } else {
         // If task is marked incomplete, we want to move it from complete to pending
         const tempCompleted = [...completedTasks]
-        const selectedTask = tempCompleted.splice(taskIdx, 1)[0]
+        const selectedTask = tempCompleted.splice(index, 1)[0]
 
         // Create new task
         const task: TaskItemType = {
