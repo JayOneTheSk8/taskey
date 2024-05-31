@@ -108,7 +108,10 @@ const AuthPage = ({ classes }: { [key: string]: any }) => {
 
             <div
               className={classes.switchAuthButton}
-              onClick={() => setSignUpForm(!signUpForm)}
+              onClick={() => {
+                setErrors({})
+                setSignUpForm(!signUpForm)
+              }}
             >
               {signUpForm ? SIGN_IN : REGISTER}
             </div>
