@@ -4,6 +4,8 @@ The "key" to all of your task management dreams. Users can create accounts and m
 
 The project is build using a [Ruby on Rails](https://rubyonrails.org/) project connected to a [PostgresQL](https://www.postgresql.org/) database to serve a [GraphQL](https://graphql.org/) API. The UI is built in [TypeScript](https://www.typescriptlang.org/) with [React](https://react.dev/) using [Apollo](https://www.apollographql.com/docs/) to connect to the Rails' GraphQL server. 
 
+Authentication is handled via Rails' [Session Store](https://guides.rubyonrails.org/v4.1/action_controller_overview.html#accessing-the-session). A `session_token` is added to the user and the session keeps this in memory. 
+
 Running Full Application (Dev)
 ===================
 
