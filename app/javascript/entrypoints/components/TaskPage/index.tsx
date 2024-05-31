@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { withStyles } from '@material-ui/core'
-import { useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 
 import constants from '../../constants'
 import { AuthContext } from '../../authContext'
 import { ME_QUERY } from '../../queries/auth'
+import { CREATE_TASK } from '../../queries/tasks'
 
 import TaskItem, { TaskItemType } from './TaskItem'
 
@@ -17,6 +18,11 @@ const {
       PENDING_TASKS,
       COMPLETED_TASKS,
     }
+  },
+  errors: {
+    errorTypes: {
+      CREATE_TASK_ERROR,
+    },
   },
   general: {
     eventTypes: {
@@ -38,6 +44,8 @@ const {
 const TaskPage = ({ classes }: {[key: string]: any}) => {
   const context = useContext(AuthContext)
 
+  const [errors, setErrors] = useState({} as { [key: string]: string })
+
   // Keep tasks in state to allow list rerendering on change
   const [pendingTasks, setPendingTasks] = useState([] as TaskItemType[])
   const [completedTasks, setCompletedTasks] = useState([] as TaskItemType[])
@@ -52,6 +60,15 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
     onCompleted(data) {
       const { id, username } = data.me
       context.login({ id, username })
+    }
+  })
+
+  const [createTask, { loading: creatingTask }] = useMutation(CREATE_TASK, {
+    onError(err) {
+      setErrors({
+        ...errors,
+        [CREATE_TASK_ERROR]: err.graphQLErrors.map((e) => e.message).join(', ')
+      })
     }
   })
 
@@ -121,6 +138,22 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
 
   const handleNewTask = (e: React.FormEvent) => {
     e.preventDefault()
+    if (creatingTask) return
+
+    createTask({
+      variables: {
+        title: taskTitle,
+        description: taskDescription,
+        dueDate: taskDueDate || null,
+      }
+    })
+      .then(({ data }) => {
+        if (data) {
+          const taskData: TaskItemType = data.createTask
+          setPendingTasks([taskData, ...pendingTasks])
+          setTaskForm(false)
+        }
+      })
   }
 
   const taskList = (tasks: TaskItemType[]) => {
@@ -150,13 +183,28 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
         <div className={classes.taskListContainer}>
           <div className={classes.taskListHeader}>{PENDING_TASKS}</div>
 
-          <div className={classes.taskFormSwitch} onClick={() => setTaskForm(!taskForm)}>
+          <div
+            className={classes.taskFormSwitch}
+            onClick={() => {
+              // Clear errors when closing
+              if (taskForm) {
+                delete errors[CREATE_TASK_ERROR]
+              }
+
+              setTaskForm(!taskForm)
+            }}
+          >
             {taskFormSwitch(taskForm)}
           </div>
 
           {
             taskForm &&
               <form className={classes.newTaskForm} onSubmit={handleNewTask}>
+                {
+                  errors[CREATE_TASK_ERROR] &&
+                    <div className={classes.errorMessage}>{errors[CREATE_TASK_ERROR]}</div>
+                }
+
                 <label className={classes.inputLabel} htmlFor={TITLE}>{TITLE_TITLE}</label>
                 <input className={classes.titleInput} id={TITLE} type="text" onChange={(e) => setTaskTitle(e.target.value)} />
 
@@ -249,6 +297,9 @@ const styles = () => ({
     '&:disabled': {
       cursor: 'not-allowed',
     }
+  },
+  errorMessage: {
+    color: '#cf0404',
   },
 })
 

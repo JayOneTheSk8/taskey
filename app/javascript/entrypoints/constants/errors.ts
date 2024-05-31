@@ -1,5 +1,6 @@
 const errorTypes = {
-  GENERAL_ERROR: 'generalError'
+  GENERAL_ERROR: 'generalError',
+  CREATE_TASK_ERROR: 'createTaskError',
 }
 
 export default {
