@@ -17,3 +17,15 @@ export const MARK_TASK_INCOMPLETE = gql`
     }
   }
 `
+
+export const CREATE_TASK = gql`
+  mutation CreateTask($title: String!, $description: String!, $dueDate: ISO8601Date) {
+    createTask(title: $title, description: $description, dueDate: $dueDate) {
+      id
+      title
+      description
+      dueDate
+      completed
+    }
+  }
+`
