@@ -24,7 +24,14 @@ const authPage = {
   passwordLabel: (signUpForm: boolean) => `Password${signUpForm ? ` (must be at least ${PASSWORD_MIN_LIMIT} characters)` : ''}`,
 }
 
+const taskPage = {
+  userTasksHeader: (username: string) => `${username}'s Tasks`,
+  PENDING_TASKS: 'Pending Tasks',
+  COMPLETED_TASKS: 'Completed Tasks',
+}
+
 export default {
   authPage,
   navbar,
+  taskPage,
 }
