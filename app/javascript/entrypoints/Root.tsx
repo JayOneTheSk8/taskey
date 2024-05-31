@@ -72,7 +72,7 @@ const Root = ({ classes }: { [key: string]: any }) => {
           <div className={classes.navbar}>
             <div></div>
 
-            <div className={classes.taskeyIcon}>{TASKEY}</div>
+            <div className={classes.taskeyIcon} onClick={() => window.location.reload()}>{TASKEY}</div>
 
             <div
               className={classes.settings}
