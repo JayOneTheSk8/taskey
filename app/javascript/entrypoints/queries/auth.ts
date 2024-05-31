@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from '@apollo/client'
 
 export const REGISTER_USER =  gql`
   mutation Register($username: String!, $password: String!) {
