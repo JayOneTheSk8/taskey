@@ -38,6 +38,8 @@ const {
   general: {
     eventTypes: {
       COMPLETETASK,
+      UPDATETASK,
+      DELETETASK,
     },
     fields: {
       TITLE,
@@ -140,6 +142,76 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
     window.addEventListener(COMPLETETASK, handler)
 
     return () => window.removeEventListener(COMPLETETASK, handler)
+  }, [pendingTasks, completedTasks])
+
+  // Event listener for update event
+  useEffect(() => {
+    const handler = (event: any) => {
+      const {
+        index,
+        completed,
+        title,
+        description,
+        dueDate,
+      } = event.detail as UpdateTaskDetail
+
+      if (completed) {
+        // Copy task details
+        const task = { ...completedTasks[index] }
+
+        // Update Task
+        task.title = title
+        task.description = description
+        task.dueDate = dueDate
+
+        // Update Completed Task
+        setCompletedTasks([
+          ...completedTasks.slice(0, index),
+          task,
+          ...completedTasks.slice(index + 1)
+        ])
+      } else {
+        const task = { ...pendingTasks[index] }
+
+        task.title = title
+        task.description = description
+        task.dueDate = dueDate
+
+        // Update Pending Task
+        setPendingTasks([
+          ...pendingTasks.slice(0, index),
+          task,
+          ...pendingTasks.slice(index + 1)
+        ])
+      }
+    }
+
+    window.addEventListener(UPDATETASK, handler)
+
+    return () => window.removeEventListener(UPDATETASK, handler)
+  }, [pendingTasks, completedTasks])
+
+  // Event listener for delete event
+  useEffect(() => {
+    const handler = (event: any) => {
+      const { index, completed } = event.detail as QuickChangeTaskDetail
+
+      if (completed) {
+        // Delete from completed state
+        const tempCompleted = [...completedTasks]
+        tempCompleted.splice(index, 1)
+        setCompletedTasks(tempCompleted)
+      } else {
+        // Delete from pending state
+        const tempPending = [...pendingTasks]
+        tempPending.splice(index, 1)
+        setPendingTasks(tempPending)
+      }
+    }
+
+    window.addEventListener(DELETETASK, handler)
+
+    return () => window.removeEventListener(DELETETASK, handler)
   }, [pendingTasks, completedTasks])
 
   const handleNewTask = (e: React.FormEvent) => {

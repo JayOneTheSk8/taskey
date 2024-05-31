@@ -9,6 +9,8 @@ const fields = {
 const eventTypes = {
   LOGINUSER: 'LOGINUSER',
   COMPLETETASK: 'COMPLETETASK',
+  UPDATETASK: 'UPDATETASK',
+  DELETETASK: 'DELETETASK',
 }
 
 const fieldTexts = {
