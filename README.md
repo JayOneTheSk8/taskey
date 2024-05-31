@@ -6,6 +6,16 @@ The project is build using a [Ruby on Rails](https://rubyonrails.org/) project c
 
 Authentication is handled via Rails' [Session Store](https://guides.rubyonrails.org/v4.1/action_controller_overview.html#accessing-the-session). A `session_token` is added to the user and the session keeps this in memory. 
 
+Table of Contents
+===================
+- [Running Full Application](##running-full-application-dev)
+
+- [Installation](#installation)
+  - [Backend](#backend)
+  - [Frontend](#frontend)
+
+- [Notes/Thoughts](##notesthoughts)
+
 Running Full Application (Dev)
 ===================
 
