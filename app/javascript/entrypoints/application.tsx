@@ -6,8 +6,10 @@ import {
   ApolloProvider,
   createHttpLink,
   InMemoryCache,
+  from,
 } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
+import { onError } from '@apollo/client/link/error'
 
 import constants from './constants'
 
@@ -28,6 +30,17 @@ const httpLink = createHttpLink({
   credentials: 'same-origin',
 })
 
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+    if (graphQLErrors) {
+        graphQLErrors.forEach(({ message }) => {
+            console.log(message)
+        })
+    }
+    if (networkError) {
+        console.log(networkError.message)
+    }
+})
+
 const authLink = setContext((_, { headers }) => {
   // get the session token from local storage if it exists
   const token = localStorage.getItem(SESSION_TOKEN)
@@ -41,7 +54,7 @@ const authLink = setContext((_, { headers }) => {
 })
 
 const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: from([errorLink, authLink, httpLink]),
   cache: new InMemoryCache(),
 })
 
