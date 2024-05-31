@@ -23,7 +23,7 @@ interface ReducerAction {
 interface UserData {
   id: string
   username: string
-  token: string
+  token?: string
 }
 
 // These are only used here so we won't put them in the constants
@@ -68,7 +68,10 @@ const AuthProvider = (props: HashRouterProps) => {
   const [state, dispatch] = useReducer(authReducer, initialState)
 
   const login = (userData: UserData) => {
-    localStorage.setItem(SESSION_TOKEN, userData.token)
+    if (userData.token) {
+      localStorage.setItem(SESSION_TOKEN, userData.token)
+    }
+
     dispatch({ type: LOGIN, payload: { ...userData } })
   }
 
