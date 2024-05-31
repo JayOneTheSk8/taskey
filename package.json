@@ -14,6 +14,6 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build": "esbuild app/javascript/entrypoints/*.* --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets"
+    "build": "esbuild app/javascript/entrypoints/*.* --bundle --sourcemap --format=iife --outdir=app/assets/builds --public-path=/assets"
   }
 }
