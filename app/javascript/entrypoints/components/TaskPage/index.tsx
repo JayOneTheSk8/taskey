@@ -11,7 +11,9 @@ import TaskItem, { TaskItemType } from './TaskItem'
 const {
   components: {
     taskPage: {
+      taskFormSwitch,
       userTasksHeader,
+      CREATE_TASK_SUBMIT,
       PENDING_TASKS,
       COMPLETED_TASKS,
     }
@@ -20,6 +22,16 @@ const {
     eventTypes: {
       COMPLETETASK,
     },
+    fields: {
+      TITLE,
+      DESCRIPTION,
+      DUE_DATE
+    },
+    fieldTexts: {
+      TITLE_TITLE,
+      DESCRIPTION_TITLE,
+      DUE_DATE_TITLE,
+    }
   },
 } = constants
 
@@ -29,6 +41,12 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
   // Keep tasks in state to allow list rerendering on change
   const [pendingTasks, setPendingTasks] = useState([] as TaskItemType[])
   const [completedTasks, setCompletedTasks] = useState([] as TaskItemType[])
+
+  // New Task State
+  const [taskForm, setTaskForm] = useState(false)
+  const [taskTitle, setTaskTitle] = useState('')
+  const [taskDescription, setTaskDescription] = useState('')
+  const [taskDueDate, setTaskDueDate] = useState('')
 
   const { data, loading, error: meQueryError } = useQuery(ME_QUERY, {
     onCompleted(data) {
@@ -101,6 +119,10 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
     return () => window.removeEventListener(COMPLETETASK, handler)
   }, [pendingTasks, completedTasks])
 
+  const handleNewTask = (e: React.FormEvent) => {
+    e.preventDefault()
+  }
+
   const taskList = (tasks: TaskItemType[]) => {
     return tasks.map((task, idx) => {
       return (
@@ -127,6 +149,35 @@ const TaskPage = ({ classes }: {[key: string]: any}) => {
       <div className={classes.taskLists}>
         <div className={classes.taskListContainer}>
           <div className={classes.taskListHeader}>{PENDING_TASKS}</div>
+
+          <div className={classes.taskFormSwitch} onClick={() => setTaskForm(!taskForm)}>
+            {taskFormSwitch(taskForm)}
+          </div>
+
+          {
+            taskForm &&
+              <form className={classes.newTaskForm} onSubmit={handleNewTask}>
+                <label className={classes.inputLabel} htmlFor={TITLE}>{TITLE_TITLE}</label>
+                <input className={classes.titleInput} id={TITLE} type="text" onChange={(e) => setTaskTitle(e.target.value)} />
+
+                <label className={classes.inputLabel} htmlFor={DESCRIPTION}>{DESCRIPTION_TITLE}</label>
+                <textarea className={classes.descriptionInput} id={DESCRIPTION} onChange={(e) => setTaskDescription(e.target.value)} />
+
+                <label className={classes.inputLabel} htmlFor={DUE_DATE}>{DUE_DATE_TITLE}</label>
+                <input className={classes.dueDateInput} id={DUE_DATE} type="date" onChange={(e) => setTaskDueDate(e.target.value)} />
+
+                <button
+                  className={classes.newTaskSubmit}
+                  type="submit"
+                  disabled={
+                    !taskTitle.trim()
+                      || !taskDescription.trim()
+                  }
+                >
+                  {CREATE_TASK_SUBMIT}
+                </button>
+              </form>
+          }
           <div className={classes.taskList}>{taskList(pendingTasks)}</div>
         </div>
 
@@ -165,6 +216,39 @@ const styles = () => ({
   taskList: {
     height: '55vh',
     'overflow-y': 'auto',
+  },
+  taskFormSwitch: {
+    fontSize: '24px',
+    fontWeight: 600,
+    width: 'max-content',
+    cursor: 'pointer',
+  },
+  newTaskForm: {
+    display: 'flex',
+    'flex-direction': 'column'
+  },
+  inputLabel: {
+    fontSize: '16px',
+    fontWeight: 600,
+  },
+  titleInput: {
+    fontSize: '16px',
+  },
+  descriptionInput: {
+    fontSize: '16px',
+  },
+  dueDateInput: {
+    fontSize: '16px',
+  },
+  newTaskSubmit: {
+    fontSize: '16px',
+    fontWeight: 600,
+    margin: '1em 0',
+    cursor: 'pointer',
+    width: 'max-content',
+    '&:disabled': {
+      cursor: 'not-allowed',
+    }
   },
 })
 

@@ -25,7 +25,9 @@ const authPage = {
 }
 
 const taskPage = {
+  taskFormSwitch: (taskForm: boolean) => taskForm ? '-': '+',
   userTasksHeader: (username: string) => `${username}'s Tasks`,
+  CREATE_TASK_SUBMIT: 'Create Task',
   PENDING_TASKS: 'Pending Tasks',
   COMPLETED_TASKS: 'Completed Tasks',
 }
