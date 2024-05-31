@@ -1,7 +1,12 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { withStyles } from '@material-ui/core'
+import { useMutation } from '@apollo/client'
 
 import constants from '../../constants'
+import { UserData, AuthContext } from '../../authContext'
+import { REGISTER_USER, LOGIN_USER } from '../../queries/auth'
+import { dispatchEvent } from '../../util'
+
 
 const {
   components: {
@@ -22,6 +27,9 @@ const {
     },
   },
   general: {
+    eventTypes: {
+      LOGINUSER,
+    },
     fields: {
       USERNAME,
       PASSWORD,
@@ -37,6 +45,8 @@ const {
 } = constants
 
 const AuthPage = ({ classes }: { [key: string]: any }) => {
+  const context = useContext(AuthContext)
+
   // Whether or not we are signing up a user or logging them in
   const [signUpForm, setSignUpForm] = useState(false)
 
@@ -47,8 +57,55 @@ const AuthPage = ({ classes }: { [key: string]: any }) => {
   // Errors
   const [errors, setErrors] = useState({} as { [key: string]: string })
 
-  const handleUser = () => {
-    // TODO: Call GraphQL Mutation
+  const [loginUser, { loading: loggingInUser }] = useMutation(LOGIN_USER, {
+    onError(err) {
+      setErrors({
+        ...errors,
+        [GENERAL_ERROR]: err.graphQLErrors.map((e) => e.message).join(', ')
+      })
+    }
+  })
+
+  const [registerUser, { loading: registeringUser }] = useMutation(REGISTER_USER, {
+    onError(err) {
+      setErrors({
+        ...errors,
+        [GENERAL_ERROR]: err.graphQLErrors.map((e) => e.message).join(', ')
+      })
+    }
+  })
+
+  const handleUser = (e: React.FormEvent) => {
+    e.preventDefault()
+    setErrors({})
+
+    if (signUpForm) {
+      registerUser({
+        variables: {
+          username,
+          password,
+        }
+      }).then(({ data }) => {
+        if (data) {
+          const userData: UserData = data.register
+          context.login(userData)
+          dispatchEvent(LOGINUSER, { loggedIn: true })
+        }
+      })
+    } else {
+      loginUser({
+        variables: {
+          username,
+          password,
+        }
+      }).then(({ data }) => {
+        if (data) {
+          const userData: UserData = data.login
+          context.login(userData)
+          dispatchEvent(LOGINUSER, { loggedIn: true })
+        }
+      })
+    }
   }
 
   return (
@@ -62,6 +119,7 @@ const AuthPage = ({ classes }: { [key: string]: any }) => {
         }
 
         <form onSubmit={handleUser} className={classes.authForm}>
+          {/* Username Label */}
           <label
             htmlFor={USERNAME}
             className={classes.formLabel}
@@ -77,6 +135,7 @@ const AuthPage = ({ classes }: { [key: string]: any }) => {
             onChange={e => setUsername(e.target.value)}
           />
 
+          {/* Password Label */}
           <label
             htmlFor={PASSWORD}
             className={classes.formLabel}  
@@ -90,6 +149,7 @@ const AuthPage = ({ classes }: { [key: string]: any }) => {
             onChange={e => setPassword(e.target.value)}
           />
 
+          {/* Submit Button */}
           <button
             type="submit"
             className={classes.submit}
@@ -98,11 +158,14 @@ const AuthPage = ({ classes }: { [key: string]: any }) => {
                 || !password.trim()
                 || username.trim().length < USERNAME_MIN_LIMIT
                 || password.trim().length < PASSWORD_MIN_LIMIT
+                || loggingInUser
+                || registeringUser
             }
           >
             {signUpForm ? REGISTER : SIGN_IN}
           </button>
 
+          {/* Switch to Login/Register */}
           <div className={classes.switchAuth}>
             {signUpForm ? ALREADY_HAVE_ACCOUNT : DONT_HAVE_ACCOUNT}
 
