@@ -4,10 +4,16 @@ const fields = {
 }
 
 const eventTypes = {
-  LOGINUSER: 'LOGINUSER'
+  LOGINUSER: 'LOGINUSER',
+  COMPLETETASK: 'COMPLETETASK',
+}
+
+const fieldTexts = {
+  EDIT: 'Edit',
 }
 
 export default {
   eventTypes,
   fields,
+  fieldTexts,
 }
