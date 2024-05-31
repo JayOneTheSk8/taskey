@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { withStyles } from '@material-ui/core'
 
@@ -17,6 +17,11 @@ const {
       TASKEY,
     },
   },
+  general: {
+    eventTypes: {
+      LOGINUSER,
+    },
+  },
   util: {
     tokens: {
       SESSION_TOKEN,
@@ -27,6 +32,17 @@ const {
 const Root = ({ classes }: { [key: string]: any }) => {
   // User is logged in if there is a session token in local storage
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem(SESSION_TOKEN))
+
+  // This allows us to update this state from child components
+  useEffect(() => {
+    const handler = (event: any) => {
+      setIsLoggedIn(event.detail.loggedIn)
+    }
+
+    window.addEventListener(LOGINUSER, handler)
+
+    return () => window.removeEventListener(LOGINUSER, handler)
+  }, [])
 
   return (
     <div className={classes.root}>
