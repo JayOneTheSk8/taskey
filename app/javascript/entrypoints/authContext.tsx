@@ -1,5 +1,6 @@
 import React, { createContext, useReducer } from 'react'
 import { HashRouterProps } from 'react-router-dom'
+import { useApolloClient } from '@apollo/client'
 
 import constants from './constants'
 
@@ -66,6 +67,7 @@ const AuthContext = createContext({} as AuthContextType)
 // HashRouter is child of AuthProvider so the props are HashRouterProps
 const AuthProvider = (props: HashRouterProps) => {
   const [state, dispatch] = useReducer(authReducer, initialState)
+  const apolloClient = useApolloClient()
 
   const login = (userData: UserData) => {
     if (userData.token) {
@@ -77,6 +79,7 @@ const AuthProvider = (props: HashRouterProps) => {
 
   const logout = () => {
     localStorage.removeItem(SESSION_TOKEN)
+    apolloClient.resetStore()
     dispatch({ type: LOGOUT })
   }
 
