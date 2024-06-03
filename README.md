@@ -25,6 +25,7 @@ To run the entire application (frontend/backend), there is a helpful foreman scr
 bin/dev
 ```
 
+The server will be loaded at http://127.0.0.1:3000/
 
 Installation
 ===================
@@ -98,7 +99,7 @@ yarn
 ```
 
 #### Build Assets
-The assets can either be build using the script or using foreman. When run via foreman, the Rails server is also run and the entrypoint at `app/assets/javascript/entryopints/` is watched for changes. There is a helpful file to load everything in `bin/dev`.
+The assets can either be build using the script or using foreman. When run via foreman, the Rails server is also run and the entrypoint at `app/assets/javascript/entryopints/` is watched for changes. There is a helpful file to load everything with `bin/dev`.
 
 via NPM Script (Build assets alone)
 ```sh
